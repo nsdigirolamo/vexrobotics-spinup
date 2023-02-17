@@ -2,8 +2,8 @@
 /*                                                                            */
 /*    Module:       main.cpp                                                  */
 /*    Author:       Nicholas DiGirolamo                                       */
-/*    Created:      Thu Feb 16 2023                                           */
-/*    Description:  UDEVX Team 2 Competition Code                             */
+/*    Created:      Thursday, February 16, 2023                               */
+/*    Description:  UDVEX Team 2 Competition Code                             */
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
 
@@ -27,13 +27,16 @@ motor_group left_motor_group = motor_group(rear_left_motor, front_left_motor);
 
 motor rear_right_motor = motor(PORT19, GREEN_GEAR_CART, true);
 motor front_right_motor = motor(PORT20, GREEN_GEAR_CART, true);
-motor_group right_motor_group = motor_group(rear_right_motor, front_right_motor);
+motor_group right_motor_group =
+    motor_group(rear_right_motor, front_right_motor);
 
 double wheel_travel = 3.25;       // Circumference of the wheel.
 double track_width = 12.0;        // Distance between the left and right wheels.
 double wheel_base = 10.0;         // Distance between wheels on the same side.
 double external_gear_ratio = 1.0; // Gear ratio.
-drivetrain drive_train = drivetrain(left_motor_group, right_motor_group, wheel_travel, track_width, wheel_base, distanceUnits::in, external_gear_ratio);
+drivetrain drive_train =
+    drivetrain(left_motor_group, right_motor_group, wheel_travel, track_width,
+               wheel_base, distanceUnits::in, external_gear_ratio);
 
 /*---------------------------------------------------------------------------*/
 /*                          Pre-Autonomous Functions                         */
