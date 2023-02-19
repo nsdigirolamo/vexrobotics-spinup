@@ -11,9 +11,5 @@ brain Brain;
  * This should be called at the start of your int main function.
  */
 void vexcodeInit(void) {
-  Brain.Screen.print("Initializing...");
-  Brain.Screen.newLine();
   // Nothing to initialize
-  Brain.Screen.print("Initialization complete.");
-  Brain.Screen.newLine();
 }

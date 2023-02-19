@@ -16,10 +16,13 @@ const gearSetting GREEN_GEAR_CART = ratio18_1;
 // const gearSetting BLUE_GEAR_CART = ratio6_1;
 
 competition compete;
+brain my_brain;
 
 controller primary_controller = controller(primary);
 
 motor intake = motor(PORT1, GREEN_GEAR_CART, false);
+
+motor launcher = motor(PORT2, GREEN_GEAR_CART, false);
 
 motor rear_left_motor = motor(PORT11, GREEN_GEAR_CART, false);
 motor front_left_motor = motor(PORT12, GREEN_GEAR_CART, false);
@@ -27,16 +30,21 @@ motor_group left_motor_group = motor_group(rear_left_motor, front_left_motor);
 
 motor rear_right_motor = motor(PORT19, GREEN_GEAR_CART, true);
 motor front_right_motor = motor(PORT20, GREEN_GEAR_CART, true);
-motor_group right_motor_group =
-    motor_group(rear_right_motor, front_right_motor);
+motor_group right_motor_group = motor_group(rear_right_motor, front_right_motor);
 
 double wheel_travel = 3.25;       // Circumference of the wheel.
 double track_width = 12.0;        // Distance between the left and right wheels.
 double wheel_base = 10.0;         // Distance between wheels on the same side.
 double external_gear_ratio = 1.0; // Gear ratio.
-drivetrain drive_train =
-    drivetrain(left_motor_group, right_motor_group, wheel_travel, track_width,
-               wheel_base, distanceUnits::in, external_gear_ratio);
+drivetrain drive_train = drivetrain(
+  left_motor_group,
+  right_motor_group,
+  wheel_travel,
+  track_width,
+  wheel_base,
+  distanceUnits::in,
+  external_gear_ratio
+);
 
 /*---------------------------------------------------------------------------*/
 /*                          Pre-Autonomous Functions                         */
@@ -49,11 +57,14 @@ drivetrain drive_train =
 /*---------------------------------------------------------------------------*/
 
 void pre_auton(void) {
+  my_brain.Screen.print("Pre-Autonomous start!");
+  my_brain.Screen.newLine();
   // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
-
   // All activities that occur before the competition starts
   // Example: clearing encoders, setting servo positions, ...
+  my_brain.Screen.print("Pre-Autonomous complete.");
+  my_brain.Screen.newLine();
 }
 
 /*---------------------------------------------------------------------------*/
@@ -67,9 +78,13 @@ void pre_auton(void) {
 /*---------------------------------------------------------------------------*/
 
 void autonomous(void) {
+  my_brain.Screen.print("Autonomous start!");
+  my_brain.Screen.newLine();
   // ..........................................................................
   // Insert autonomous user code here.
   // ..........................................................................
+  my_brain.Screen.print("Autonomous complete.");
+  my_brain.Screen.newLine();
 }
 
 /*---------------------------------------------------------------------------*/
@@ -83,14 +98,43 @@ void autonomous(void) {
 /*---------------------------------------------------------------------------*/
 
 void usercontrol(void) {
+  my_brain.Screen.print("User Control start!");
+  my_brain.Screen.newLine();
 
+  bool is_intake_stopped = true;
+  bool is_launcher_stopped = true;
   bool is_left_stopped = true;
   bool is_right_stopped = true;
-  bool is_intake_stopped = true;
 
   intake.setVelocity(100, percent);
 
   while (true) {
+
+    // Intake control
+    if (primary_controller.ButtonL1.pressing()) {
+      intake.spin(forward);
+      is_intake_stopped = false;
+    } else if (primary_controller.ButtonL2.pressing()) {
+      intake.spin(reverse);
+      is_intake_stopped = false;
+    } else {
+      intake.stop();
+      is_intake_stopped = true;
+    }
+
+    // Launcher control
+    if (primary_controller.ButtonA.pressing()) {
+      launcher.setVelocity(75, percent);
+      launcher.spin(forward);
+      is_launcher_stopped = false;
+    } else if (primary_controller.ButtonX.pressing()) {
+      launcher.setVelocity(100, percent);
+      launcher.spin(forward);
+      is_launcher_stopped = false;
+    } else if (primary_controller.ButtonB.pressing()) {
+      launcher.stop();
+      is_launcher_stopped = true;
+    }
 
     // Left drive train control
     int left_drive_speed = primary_controller.Axis3.position();
@@ -107,33 +151,25 @@ void usercontrol(void) {
     int right_drive_speed = primary_controller.Axis2.position();
     if (5 < abs(right_drive_speed)) {
       right_motor_group.setVelocity(right_drive_speed, percent);
-      left_motor_group.spin(forward);
+      right_motor_group.spin(forward);
       is_right_stopped = false;
     } else if (!is_right_stopped) {
       right_motor_group.stop();
       is_right_stopped = true;
     }
 
-    // Intake control
-    if (primary_controller.ButtonL1.pressing()) {
-      intake.spin(forward);
-      is_intake_stopped = false;
-    } else if (primary_controller.ButtonL2.pressing()) {
-      intake.spin(reverse);
-      is_intake_stopped = false;
-    } else {
-      intake.stop();
-      is_intake_stopped = true;
-    }
-
     wait(20, msec);
   }
+  my_brain.Screen.print("User Control complete.");
+  my_brain.Screen.newLine();
 }
 
 //
 // Main will set up the competition functions and callbacks.
 //
 int main() {
+  my_brain.Screen.print("Main start!");
+  my_brain.Screen.newLine();
   // Set up callbacks for autonomous and driver control periods.
   compete.autonomous(autonomous);
   compete.drivercontrol(usercontrol);
@@ -146,4 +182,6 @@ int main() {
   while (true) {
     wait(100, msec);
   }
+  my_brain.Screen.print("Main complete.");
+  my_brain.Screen.newLine();
 }
