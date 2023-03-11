@@ -13,7 +13,7 @@ using namespace vex;
 
 // const gearSetting RED_GEAR_CART = ratio36_1;
 const gearSetting GREEN_GEAR_CART = ratio18_1;
-// const gearSetting BLUE_GEAR_CART = ratio6_1;
+const gearSetting BLUE_GEAR_CART = ratio6_1;
 
 competition compete;
 brain my_brain;
@@ -21,7 +21,8 @@ brain my_brain;
 controller primary_controller = controller(primary);
 
 motor intake = motor(PORT1, GREEN_GEAR_CART, false);
-
+motor strings = motor(PORT6, GREEN_GEAR_CART, false);
+motor barrel = motor(PORT3, BLUE_GEAR_CART, false);
 motor launcher = motor(PORT2, GREEN_GEAR_CART, false);
 
 motor rear_left_motor = motor(PORT11, GREEN_GEAR_CART, false);
@@ -80,9 +81,34 @@ void pre_auton(void) {
 void autonomous(void) {
   my_brain.Screen.print("Autonomous start!");
   my_brain.Screen.newLine();
-  // ..........................................................................
-  // Insert autonomous user code here.
-  // ..........................................................................
+  // Push discs forward
+  left_motor_group.spin(forward);
+  right_motor_group.spin(forward);
+  wait(5.0, sec);
+  left_motor_group.stop();
+  right_motor_group.stop();
+  // Move back from discs
+  left_motor_group.spin(reverse);
+  right_motor_group.spin(reverse);
+  wait(8.0, sec);
+  left_motor_group.stop();
+  right_motor_group.stop();
+  // Turn 90 degrees
+  left_motor_group.spin(forward);
+  right_motor_group.spin(reverse);
+  wait(1.25, sec);
+  right_motor_group.stop();
+  left_motor_group.stop();
+  // Reverse into barrel
+  left_motor_group.spin(reverse);
+  right_motor_group.spin(reverse);
+  wait(1.0, sec);
+  left_motor_group.stop();
+  right_motor_group.stop();
+  // Spin barrel
+  barrel.spin(forward);
+  wait(3.0, sec);
+  barrel.stop();
   my_brain.Screen.print("Autonomous complete.");
   my_brain.Screen.newLine();
 }
@@ -102,11 +128,15 @@ void usercontrol(void) {
   my_brain.Screen.newLine();
 
   bool is_intake_stopped = true;
+  bool is_strings_stopped = true;
+  bool is_barrel_stopped = true;
   bool is_launcher_stopped = true;
   bool is_left_stopped = true;
   bool is_right_stopped = true;
 
   intake.setVelocity(100, percent);
+  strings.setVelocity(100, percent);
+  barrel.setVelocity(100, percent);
 
   while (true) {
 
@@ -122,14 +152,33 @@ void usercontrol(void) {
       is_intake_stopped = true;
     }
 
+    // Strings control
+    if (primary_controller.ButtonUp.pressing() && primary_controller.ButtonDown.pressing()) {
+      strings.spin(forward);
+      is_strings_stopped = false;
+    } else {
+      strings.stop();
+      is_strings_stopped = true;
+    }
+
+    // Barrel Control
+    if (primary_controller.ButtonR1.pressing()) {
+      barrel.spin(forward);
+      is_barrel_stopped = false;
+    } else if (primary_controller.ButtonR2.pressing()) {
+      barrel.spin(reverse);
+      is_barrel_stopped = false;
+    } else {
+      barrel.stop();
+      is_barrel_stopped = true;
+    }
+
     // Launcher control
     if (primary_controller.ButtonA.pressing()) {
-      launcher.setVelocity(75, percent);
-      launcher.spin(forward);
+      launcher.spin(forward, 10, volt);
       is_launcher_stopped = false;
     } else if (primary_controller.ButtonX.pressing()) {
-      launcher.setVelocity(100, percent);
-      launcher.spin(forward);
+      launcher.spin(forward, 12, volt);
       is_launcher_stopped = false;
     } else if (primary_controller.ButtonB.pressing()) {
       launcher.stop();
